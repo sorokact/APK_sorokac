@@ -384,7 +384,7 @@ class Algorithms:
         
         return mbr_res, sigma
     
-    
+    # AI plus own lines 388 - 460
     def simplifyBuildingWeightedBisector(self, building: QPolygonF):
         #Simplify building using weighted bisector (diagonals)
         n = len(building)
@@ -416,33 +416,24 @@ class Algorithms:
         two_diag_len = []
         two_diag_dir = []
         
-        # Check for intersections using inlined half-plane tests
+        # Check for intersections using standard PyQt6 QLineF
         for (a_coords, b_coords), length in sorted_diagonals.items():
             a, b = QPointF(*a_coords), QPointF(*b_coords)
+            diag_line = QLineF(a, b)
             
             is_valid = True
             for i in range(n):
                 c = building[i]
                 d = building[(i + 1) % n]
+                edge_line = QLineF(c, d)
                 
-                # Inlined point location test for Point a vs edge cd
-                det_a = (d.x() - c.x()) * (a.y() - c.y()) - (d.y() - c.y()) * (a.x() - c.x())
-                ta = 1 if det_a > 0 else -1 if det_a < 0 else 0
+                # Ignore intersection if lines share endpoints
+                if a == c or a == d or b == c or b == d:
+                    continue
                 
-                # Inlined point location test for Point b vs edge cd
-                det_b = (d.x() - c.x()) * (b.y() - c.y()) - (d.y() - c.y()) * (b.x() - c.x())
-                tb = 1 if det_b > 0 else -1 if det_b < 0 else 0
-                
-                # Inlined point location test for Point c vs diagonal ab
-                det_c = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x())
-                tc = 1 if det_c > 0 else -1 if det_c < 0 else 0
-                
-                # Inlined point location test for Point d vs diagonal ab
-                det_d = (b.x() - a.x()) * (d.y() - a.y()) - (b.y() - a.y()) * (d.x() - a.x())
-                td = 1 if det_d > 0 else -1 if det_d < 0 else 0
-                
-                # If both points of one segment are NOT on the same side of the other, they intersect
-                if not (ta == tb or tc == td or a == c or a == d or b == c or b == d):
+                # Check for bounded intersection
+                intersection_type, _ = diag_line.intersects(edge_line)
+                if intersection_type == QLineF.IntersectionType.BoundedIntersection:
                     is_valid = False
                     break
             

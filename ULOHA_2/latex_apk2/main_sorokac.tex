@@ -285,6 +285,24 @@ V tomto souboru byly uloženy následující funkce:
 \end{itemize}
 
 \newpage
+\section{Zhodnocení přesnosti algoritmů}
+\vspace{5mm}
+Porovnání efektivity a přesnosti algoritmů pro generalizaci budov je zobrazen v následující Tabulce 1. Nejlepších výsledků dosahuje metoda MBR a to ve všech třech datasetech. Neméně dobrých výsledků dosahuje poté algoritmus Longest Edge a PCA. Nejméně vhodný algoritmus se jeví Weighted Bisector, který ve všech datasetech dosahuje nejnižších hodnot. 
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Algoritmus} & \textbf{BUDOVY (\%)} & \textbf{BUDOVY 2 (\%)} & \textbf{BUDOVY 3 (\%)} \\ \hline
+PCA & 87 &  84 & 88  \\ \hline
+Min. Bounding Rectangle (MBR) & 91 & 85 & 91  \\ \hline
+Longest Edge & 91 & 83 & 91  \\ \hline
+Wall Average & 91 & 80 & 90  \\ \hline
+Weighted Bisector & 86 & 77 & 83  \\ \hline
+\end{tabular}
+\caption{Srovnání shody výsledků metod s původními datasety (překryvu v \%)}
+\end{table}
+
+\newpage
 \section*{Seznam literatury}
 \vspace{5mm}
 \noindent BAYER, T. (2026): Konvexní obálky. Prezentace pro přednášku předmětu Algoritmu počítačové kartografie, Katedra aplikované geoinformatiky  a kartografie, Přírodovědecká a fakulta UK [cit. 4. 5. 2026].

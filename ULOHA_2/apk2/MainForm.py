@@ -126,112 +126,149 @@ class Ui_MainForm(object):
         
         
     def simplifyBuildingPCAClick(self):
-        # Get input data (list of polygons)
+        #Get input data (list of polygons)
         buildings = self.Canvas.getBuilding()
         
-        # Initialization of results
+        #Initialization of results
         buildings_simp = []
         a = Algorithms()
         
-        # Run simplification for all buildings
+        #Run simplification for all buildings
         for i in buildings:
             if len(i) > 2:
                 res = a.simplifyBuildingPCA(i)
                 buildings_simp.append(res)
         
-        # Set results to canvas and repaint
+        #Set results to canvas and repaint
         self.Canvas.setSimplifBuilding(buildings_simp)
         self.Canvas.repaint()
+        self.evaluateAccuracy()
         
     def simplifyBuildingMBRClick(self):
-        # Get input data (list of polygons)
+        #Get input data (list of polygons)
         buildings = self.Canvas.getBuilding()
         
-        # Initialization of results
+        #Initialization of results
         buildings_simp = []
         a = Algorithms()
-        
-        # Run simplification for all buildings
+    
+        #Run simplification for all buildings
         for i in buildings:
             if len(i) > 2:
                 res = a.simplifyBuildingMBR(i)
                 buildings_simp.append(res)
         
-        # Set results to canvas and repaint
+        #Set results to canvas and repaint
         self.Canvas.setSimplifBuilding(buildings_simp)
         self.Canvas.repaint()
+        self.evaluateAccuracy()
             
     def simplifyBuildingLongestEdgeClick(self):
-        # Get input data (list of polygons)
+        #Get input data (list of polygons)
         buildings = self.Canvas.getBuilding()
         
-        # Initialization of results
+        #Initialization of results
         buildings_simp = []
         a = Algorithms()
         
-        # Run simplification for all buildings
+        #Run simplification for all buildings
         for i in buildings:
             if len(i) > 2:
                 res, sigma = a.simplifyBuildingLongestEdge(i)
                 buildings_simp.append(res)
         
-        # Set results to canvas and repaint
+        #Set results to canvas and repaint
         self.Canvas.setSimplifBuilding(buildings_simp)
         self.Canvas.repaint()
+        self.evaluateAccuracy()
         
     def simplifyBuildingWallAverageClick(self):
-        # Get input data (list of polygons)
+        #Get input data (list of polygons)
         buildings = self.Canvas.getBuilding()
         
-        # Initialization of results
+        #Initialization of results
         buildings_simp = []
         a = Algorithms()
         
-        # Run simplification for all buildings
+        #Run simplification for all buildings
         for i in buildings:
             if len(i) > 2:
                 res, sigma = a.simplifyBuildingWallAverage(i)
                 buildings_simp.append(res)
         
-        # Set results to canvas and repaint
+        #Set results to canvas and repaint
         self.Canvas.setSimplifBuilding(buildings_simp)
         self.Canvas.repaint()
+        self.evaluateAccuracy()
             
             
     def simplifyBuildingWWeightedBisectorClick(self):
-        # Get input data (list of polygons)
+        #Get input data (list of polygons)
         buildings = self.Canvas.getBuilding()
         
-        # Initialization of results
+        #Initialization of results
         buildings_simp = []
         a = Algorithms()
         
-        # Run simplification for all buildings
+        #Run simplification for all buildings
         for i in buildings:
             if len(i) > 2:
                 res, sigma = a.simplifyBuildingWeightedBisector(i)
                 buildings_simp.append(res)
         
-        # Set results to canvas and repaint
+        #Set results to canvas and repaint
         self.Canvas.setSimplifBuilding(buildings_simp)
-        self.Canvas.repaint()
-        
+        self.Canvas.repaint()   
+        self.evaluateAccuracy()
         
     def openFileClick(self):
-        # Open SHP file through Canvas method
+        #Open SHP file through Canvas method
         self.Canvas.openFile()
         
     def exitClick(self):
-        # Close application
+        #Close application
         QtWidgets.QApplication.instance().quit()
 
     def clearResultsClick(self):
-        # Clear results
+        #Clear results
         self.Canvas.clearResult()
         
     def clearAllClick(self):
-        # Clear everything
+        #Clear everything
         self.Canvas.clearAll()
+        
+    # AI plus own lines 240 - 270
+    def evaluateAccuracy(self):
+        budovy = self.Canvas.getBuilding()
+        if len(budovy) == 0: 
+            return
+
+        a = Algorithms()
+        vysledky = [0, 0, 0, 0, 0]
+        pocet = 0
+        
+        for b in budovy:
+            plocha = a.getArea(b)
+            if len(b) > 2 and plocha > 0:
+                pocet += 1
+                
+                # Compute accuracy for each simplification method
+                vysledky[0] += a.getArea(b.intersected(a.simplifyBuildingPCA(b))) / plocha
+                vysledky[1] += a.getArea(b.intersected(a.simplifyBuildingMBR(b))) / plocha
+                vysledky[2] += a.getArea(b.intersected(a.simplifyBuildingLongestEdge(b)[0])) / plocha
+                vysledky[3] += a.getArea(b.intersected(a.simplifyBuildingWallAverage(b)[0])) / plocha
+                vysledky[4] += a.getArea(b.intersected(a.simplifyBuildingWeightedBisector(b)[0])) / plocha
+                    
+        if pocet > 0:
+            t = "Vysledky metod:\n"
+            t += "PCA: " + str(round((vysledky[0]/pocet)*100)) + " %\n"
+            t += "MBR: " + str(round((vysledky[1]/pocet)*100)) + " %\n"
+            t += "Longest Edge: " + str(round((vysledky[2]/pocet)*100)) + " %\n"
+            t += "Wall Average: " + str(round((vysledky[3]/pocet)*100)) + " %\n"
+            t += "Weighted Bisector: " + str(round((vysledky[4]/pocet)*100)) + " %\n"
+            
+            # Display results in a message box
+            QtWidgets.QMessageBox.information(None, "Info", t)
     
     def retranslateUi(self, MainForm):
         _translate = QtCore.QCoreApplication.translate
@@ -250,7 +287,7 @@ class Ui_MainForm(object):
         self.actionClear_all.setText(_translate("MainForm", "Clear all"))
         self.actionClear_all.setToolTip(_translate("MainForm", "Clear all data"))
         self.actionLongest_Edge.setText(_translate("MainForm", "Longest Edge"))
-        self.actionLongest_Edge.setToolTip(_translate("MainForm", "Simplify building using PCA longest edge"))
+        self.actionLongest_Edge.setToolTip(_translate("MainForm", "Simplify building using longest edge"))
         self.actionWall_Average.setText(_translate("MainForm", "Wall Average"))
         self.actionWall_Average.setToolTip(_translate("MainForm", "Simplify building using wall average"))
         self.actionWeighted_bisector.setText(_translate("MainForm", "Weighted Bisector"))
